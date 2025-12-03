@@ -28,3 +28,11 @@ func main() {
     http.HandleFunc("/", handler)
     log.Fatal(http.ListenAndServe(":4444", nil))
 }
+
+func SimpleFactory(host string) Simple {
+    return Simple{"Hello", "World", host}
+}
+func handler(w http.ResponseWriter, r *http.Request) {
+    simple := SimpleFactory(r.Host)
+}
+
