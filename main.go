@@ -19,6 +19,12 @@ func SimpleFactory(host string) Simple {
 
 func handler(w http.ResponseWriter, r *http.Request) {
     simple := SimpleFactory(r.Host)
+
+    jsonOutput, _ := json.Marshal(simple)
+
+    w.Header().Set("Content-Type", "application/json")
+
+    fmt.Fprintln(w, string(jsonOutput))
 }
 
 func main() {
@@ -26,7 +32,5 @@ func main() {
     http.HandleFunc("/", handler)
     log.Fatal(http.ListenAndServe(":4444", nil))
 }
-
-
 
 
