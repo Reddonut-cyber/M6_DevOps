@@ -19,9 +19,11 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                sh 'mkdir -p ~/.ssh'
-                sh 'ssh-keyscan -H target >> ~/.ssh/known_hosts'
-                sh 'scp -i ~/.ssh/jenkins main laborant@target:~'
+                withCredentials([sshUserPrivateKey(credentialsId: 'my-ssh-key', keyFileVariable: 'KEY_FILE', usernameVariable: 'USER')]) {
+                    
+                    sh 'mkdir -p ~/.ssh'
+                    sh 'ssh-keyscan -H target >> ~/.ssh/known_hosts'
+                    sh 'scp -i $KEY_FILE main $USER@target:~'
             }
         }
     }
