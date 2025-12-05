@@ -19,7 +19,9 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                sh 'scp main laborant@target:~'
+                sh 'mkdir -p ~/.ssh'
+                sh 'ssh-keyscan -H target >> ~/.ssh/known_hosts'
+                sh 'scp -i ~/.ssh/jenkins main laborant@target:~'
             }
         }
     }
