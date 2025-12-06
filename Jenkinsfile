@@ -24,7 +24,7 @@ pipeline {
                     
                     sh 'ssh-keyscan -H target >> ~/.ssh/known_hosts'
 
-                    sh 'scp -i $KEY_FILE main $USER@target:~'
+                    sh 'ansible-playbook -i hosts.ini playbook.yml --private-key $KEY_FILE'
                 }
             }
         }
