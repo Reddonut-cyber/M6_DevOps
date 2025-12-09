@@ -18,13 +18,12 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'my-ssh-key', keyFileVariable: 'KEY_FILE', usernameVariable: 'USER')]) {
+                script {
+                    def imageName = "ttl.sh/reddonut-app:2h"
                     
-                    sh 'mkdir -p ~/.ssh'
+                    sh "docker build . -t ${imageName}"
                     
-                    sh 'ssh-keyscan -H target >> ~/.ssh/known_hosts'
-
-                    sh 'ansible-playbook -i hosts.ini playbook.yml --private-key $KEY_FILE'
+                    sh "docker push ${imageName}"
                 }
             }
         }
