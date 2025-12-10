@@ -18,12 +18,12 @@ pipeline {
         }
         stage('Build Docker Image') {
             steps {
-                sh "docker build . --tag ttl.sh/myapp2:1h"
+                sh "docker build . --tag ttl.sh/reddonut:1h"
             }
         }
         stage('Build Push Image') {
             steps {
-                sh "docker push ttl.sh/myapp2:1h"
+                sh "docker push ttl.sh/reddonut:1h"
             }
         }
         stage('Docker Run Image') {
@@ -31,7 +31,7 @@ pipeline {
                 withCredentials([sshUserPrivateKey(credentialsId: 'my-ssh-key', keyFileVariable: 'FILENAME', usernameVariable: 'USERNAME')]) {
                   sh "ssh -o StrictHostKeyChecking=no -i ${FILENAME} ${USERNAME}@docker 'docker stop myapp || true'"
                   sh "ssh -o StrictHostKeyChecking=no -i ${FILENAME} ${USERNAME}@docker 'docker rm myapp || true'"
-                  sh "ssh -o StrictHostKeyChecking=no -i ${FILENAME} ${USERNAME}@docker 'docker run --name myapp --pull always --detach --publish 4444:4444 ttl.sh/myapp2:1h'"
+                  sh "ssh -o StrictHostKeyChecking=no -i ${FILENAME} ${USERNAME}@docker 'docker run --name myapp --pull always --detach --publish 4444:4444 ttl.sh/reddonut:1h'"
                }
             }
         }
