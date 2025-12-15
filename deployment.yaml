@@ -16,4 +16,4 @@ spec:
     spec:
       containers:
       - name: myapp
-        image: ttl.sh/myapp2:1h
+        image: ttl.sh/reddonut:1h
