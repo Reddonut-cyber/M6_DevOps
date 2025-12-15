@@ -2,7 +2,11 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: myapp
+  labels:
+    app: myapp
 spec:
   containers:
   - name: myapp
-    image: ttl.sh/myapp2:1h
+    image: ttl.sh/reddonut:1h
+    ports:
+    - containerPort: 4444
