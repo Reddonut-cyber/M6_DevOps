@@ -1,0 +1,13 @@
+[Unit]
+Description=My Node.js Application
+After=network.target
+
+[Service]
+
+User=laborant
+WorkingDirectory=/home/laborant/myapp
+ExecStart=/usr/bin/node index.js
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
