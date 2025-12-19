@@ -1,39 +1,59 @@
 pipeline {
-    agent any
+  agent any
+  
+  tools {
+    nodejs 'node24'
+  }
 
-    tools {
-       go "1.24.1"
+
+  stages {
+    stage('Install packages') {
+        steps {
+            sh 'npm install'
+        }
     }
 
-    stages {
-        stage('Test') {
-              steps {
-                   sh "go test ./..."
-              }
-        }
-        stage('Build') {
-            steps {
-                sh "go build main.go"
-            }
-        }
-        stage('Build Docker Image') {
-            steps {
-                sh "docker build . --tag ttl.sh/reddonut:1h"
-            }
-        }
-        stage('Build Push Image') {
-            steps {
-                sh "docker push ttl.sh/reddonut:1h"
-            }
-        }
-        stage('Docker Run Image') {
-            steps {
-                withCredentials([sshUserPrivateKey(credentialsId: 'my-ssh-key', keyFileVariable: 'FILENAME', usernameVariable: 'USERNAME')]) {
-                  sh "ssh -o StrictHostKeyChecking=no -i ${FILENAME} ${USERNAME}@docker 'docker stop myapp || true'"
-                  sh "ssh -o StrictHostKeyChecking=no -i ${FILENAME} ${USERNAME}@docker 'docker rm myapp || true'"
-                  sh "ssh -o StrictHostKeyChecking=no -i ${FILENAME} ${USERNAME}@docker 'docker run --name myapp --pull always --detach --publish 4444:4444 ttl.sh/reddonut:1h'"
-               }
-            }
+
+    stage('Test') {
+        steps {
+            sh 'npm test'
         }
     }
-}
+
+    stage('Build Docker Image') {
+        steps {
+            sh 'docker build --tag ttl.sh/reddonut:1h .'
+        }
+
+    }
+
+    stage('Push Docker Image') {
+        steps {
+            sh 'docker push ttl.sh/reddonut:1h'        
+        }
+    }
+
+    stage('Deploy') {
+        parallel {
+            stage('Deploy to target') {
+                steps {
+                    withCredentials([sshUserPrivateKey(credentialsId: 'targetkey', keyFileVariable: 'KEYFILE', usernameVariable: 'USERNAME')]) {
+                        sh '''
+                            ansible-playbook --inventory=./target/host.ini \
+                            --private-key=${KEYFILE} \
+                            -e "ansible_ssh_common_args='-o StrictHostKeyChecking=no'" \
+                            ./target/playbook.yml
+                        '''
+                    }
+                }
+            }
+
+            stage('Deploy to docker') {
+               steps {
+                    withCredentials([sshUserPrivateKey(credentialsId: 'dockerkey', keyFileVariable: 'KEYFILE', usernameVariable: 'USERNAME')]) {
+                        sh "ssh -o StrictHostKeyChecking=no -i ${KEYFILE} ${USERNAME}@docker 'docker pull ttl.sh/reddonut:1h'"
+                        sh "ssh -o StrictHostKeyChecking=no -i ${KEYFILE} ${USERNAME}@docker 'docker rm -f myapp || true'"
+                        sh "ssh -o StrictHostKeyChecking=no -i ${KEYFILE} ${USERNAME}@docker 'docker run --rm -dit --name myapp -p 4444:4444 ttl.sh/reddonut:1h'"
+                    }
+                }         
+            }
