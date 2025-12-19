@@ -55,15 +55,12 @@ pipeline {
                     }          
                 }
                 stage('Deploy to kubernetes') {
-                    steps {
-                        withCredentials([sshUserPrivateKey(credentialsId: 'kuberneteskey', keyFileVariable: 'KEYFILE', usernameVariable: 'USERNAME')]) {
-                            script {
-                                sh "ssh -o StrictHostKeyChecking=no -i ${KEYFILE} ${USERNAME}@kubernetes 'kubectl create deployment myapp --image=ttl.sh/reddonut:1h --dry-run=client -o yaml | kubectl apply -f -'"
-                                sh "ssh -o StrictHostKeyChecking=no -i ${KEYFILE} ${USERNAME}@kubernetes 'kubectl expose deployment myapp --type=NodePort --port=4444 --name=myapp-service --dry-run=client -o yaml | kubectl apply -f -'"
-                            }
-                        }
+               steps {
+                    withKubeConfig(credentialsId: 'kuberneteskey', serverUrl: 'https://kubernetes:6443') {
+                        sh 'kubectl apply -f ./kubernetes/'
                     }
-                }
+                }         
+            }
             } 
         } 
     } 
