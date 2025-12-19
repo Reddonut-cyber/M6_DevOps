@@ -1,0 +1,23 @@
+- name: Deploy App to Target
+  hosts: webservers
+  become: yes
+  tasks:
+    - name: Pull Docker image
+      docker_image:
+        name: ttl.sh/reddonut:1h
+        source: pull
+        force_source: yes
+
+    - name: Stop and remove old container
+      docker_container:
+        name: myapp
+        state: absent
+
+    - name: Run new container
+      docker_container:
+        name: myapp
+        image: ttl.sh/reddonut:1h
+        state: started
+        ports:
+          - "4444:4444"
+        detach: yes
