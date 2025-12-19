@@ -1,5 +1,5 @@
 - name: Deploy Node.js App via Systemd
-  hosts: webservers
+  hosts: all
   become: yes
   tasks:
     - name: Download Node.js setup script
