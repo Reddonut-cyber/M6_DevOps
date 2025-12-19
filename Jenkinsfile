@@ -54,14 +54,22 @@ pipeline {
                         }
                     }          
                 }
+
                 stage('Deploy to kubernetes') {
-               steps {
-                    withKubeConfig(credentialsId: 'kuberneteskey', serverUrl: 'https://kubernetes:6443') {
-                        sh 'kubectl apply -f ./kubernetes/'
+                    steps {
+                        withCredentials([sshUserPrivateKey(credentialsId: 'kuberneteskey', keyFileVariable: 'KEYFILE', usernameVariable: 'USERNAME')]) {
+                            script {
+                                sh "ssh -o StrictHostKeyChecking=no -i ${KEYFILE} ${USERNAME}@kubernetes 'kubectl delete deployment myapp || true'"
+                                sh "ssh -o StrictHostKeyChecking=no -i ${KEYFILE} ${USERNAME}@kubernetes 'kubectl delete service myapp-service || true'"
+                                
+                                sh "ssh -o StrictHostKeyChecking=no -i ${KEYFILE} ${USERNAME}@kubernetes 'kubectl create deployment myapp --image=ttl.sh/reddonut:1h'"
+                                
+                                sh "ssh -o StrictHostKeyChecking=no -i ${KEYFILE} ${USERNAME}@kubernetes 'kubectl expose deployment myapp --type=NodePort --port=4444 --name=myapp-service'"
+                            }
+                        }
                     }
-                }         
+                }
             }
-            } 
-        } 
-    } 
-} 
+        }
+    }
+}
