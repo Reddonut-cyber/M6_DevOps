@@ -1,23 +1,55 @@
-- name: Deploy App to Target
+- name: Deploy Node.js App via Systemd
   hosts: webservers
   become: yes
   tasks:
-    - name: Pull Docker image
-      docker_image:
-        name: ttl.sh/reddonut:1h
-        source: pull
-        force_source: yes
+    - name: Download Node.js setup script
+      get_url:
+        url: https://deb.nodesource.com/setup_24.x
+        dest: /tmp/nodesource_setup.sh
+        mode: '0755'
 
-    - name: Stop and remove old container
-      docker_container:
-        name: myapp
-        state: absent
+    - name: Run Node.js setup script
+      shell: /tmp/nodesource_setup.sh
 
-    - name: Run new container
-      docker_container:
+    - name: Install Node.js
+      apt:
+        name: nodejs
+        state: present
+        update_cache: yes
+
+    - name: Create app directory
+      file:
+        path: /home/laborant/myapp
+        state: directory
+        owner: laborant
+        group: laborant
+        mode: '0755'
+
+    - name: Copy Application Files
+      copy:
+        src: "{{ item }}"
+        dest: /home/laborant/myapp/
+        owner: laborant
+        group: laborant
+      with_items:
+        - "../index.js"
+        - "../package.json"
+
+    - name: Install dependencies
+      npm:
+        path: /home/laborant/myapp
+
+    - name: Copy Service file
+      copy:
+        src: "../myapp.service"
+        dest: /etc/systemd/system/myapp.service
+
+    - name: Reload Systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: Start and Enable Service
+      systemd:
         name: myapp
-        image: ttl.sh/reddonut:1h
-        state: started
-        ports:
-          - "4444:4444"
-        detach: yes
+        state: restarted
+        enabled: yes
