@@ -59,12 +59,13 @@ pipeline {
                     steps {
                         withCredentials([sshUserPrivateKey(credentialsId: 'kuberneteskey', keyFileVariable: 'KEYFILE', usernameVariable: 'USERNAME')]) {
                             script {
-                                sh "ssh -o StrictHostKeyChecking=no -i ${KEYFILE} ${USERNAME}@kubernetes 'kubectl delete deployment myapp || true'"
+                                sh "ssh -o StrictHostKeyChecking=no -i ${KEYFILE} ${USERNAME}@kubernetes 'kubectl delete pod myapp || true'"
                                 sh "ssh -o StrictHostKeyChecking=no -i ${KEYFILE} ${USERNAME}@kubernetes 'kubectl delete service myapp-service || true'"
                                 
-                                sh "ssh -o StrictHostKeyChecking=no -i ${KEYFILE} ${USERNAME}@kubernetes 'kubectl create deployment myapp --image=ttl.sh/reddonut:1h'"
                                 
-                                sh "ssh -o StrictHostKeyChecking=no -i ${KEYFILE} ${USERNAME}@kubernetes 'kubectl expose deployment myapp --type=NodePort --port=4444 --name=myapp-service'"
+                                sh "ssh -o StrictHostKeyChecking=no -i ${KEYFILE} ${USERNAME}@kubernetes 'kubectl run myapp --image=ttl.sh/reddonut:1h --restart=Never --port=4444 --labels=app=myapp'"
+                                
+                                sh "ssh -o StrictHostKeyChecking=no -i ${KEYFILE} ${USERNAME}@kubernetes 'kubectl expose pod myapp --type=NodePort --port=4444 --name=myapp-service'"
                             }
                         }
                     }
