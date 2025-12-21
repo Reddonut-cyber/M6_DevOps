@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        AWS_IP = "3.73.117.173"
+        AWS_IP = "3.120.132.69" 
     }
 
     stages {
@@ -19,18 +19,6 @@ pipeline {
         stage('Build') {
             steps {
                 sh "go build -o main main.go"
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                sh "docker build . --tag ttl.sh/reddonut:1h"
-            }
-        }
-
-        stage('Build Push Image') {
-            steps {
-                sh "docker push ttl.sh/reddonut:1h"
             }
         }
 
