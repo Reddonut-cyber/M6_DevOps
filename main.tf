@@ -4,7 +4,7 @@ provider "aws" {
 
 resource "aws_key_pair" "main" {
   key_name   = "key-for-lab-laborant-01" 
-  public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIArA4x3z6Y0qQzYTA79CUrb8qiZTCbFOm8rV/yVSzqBn laborant@flexbox (managed)"
+  public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKkJTeZa+PyIqBSe5yLsUxo7t/U5+1p+g4MyLwlYrkYc laborant@flexbox (managed)"
 }
 
 resource "aws_security_group" "main" {
