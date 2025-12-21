@@ -18,7 +18,7 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh "go build -o main main.go"
+                sh "CGO_ENABLED=0 go build -o main main.go"
             }
         }
 
